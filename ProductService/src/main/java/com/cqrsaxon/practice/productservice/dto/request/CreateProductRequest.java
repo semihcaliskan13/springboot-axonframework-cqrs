@@ -1,10 +1,13 @@
 package com.cqrsaxon.practice.productservice.dto.request;
 
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class CreateProductRequest {
     private String title;
     private BigDecimal price;
