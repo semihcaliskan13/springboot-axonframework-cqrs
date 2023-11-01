@@ -4,6 +4,7 @@ import com.cqrsaxon.practice.productservice.coreapi.CreateProductCommand;
 import com.cqrsaxon.practice.productservice.coreapi.GetAllProductsQuery;
 import com.cqrsaxon.practice.productservice.dto.request.CreateProductRequest;
 import com.cqrsaxon.practice.productservice.dto.response.ProductGetAllResponseWrapper;
+import jakarta.validation.Valid;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
@@ -39,7 +40,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public String createProduct(@RequestBody CreateProductRequest request) throws ExecutionException, InterruptedException {
+    public String createProduct(@Valid @RequestBody CreateProductRequest request) throws ExecutionException, InterruptedException {
         CreateProductCommand productCommand =CreateProductCommand.builder()
                 .price(request.getPrice())
                 .title(request.getTitle())

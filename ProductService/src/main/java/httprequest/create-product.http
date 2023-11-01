@@ -2,7 +2,7 @@ POST http://localhost:8080/products
 Content-Type: application/json
 
 {
-"title":"ithaki",
+"title":"ada yayinlari",
 "price":10,
-"quantity":20
+"quantity":50
 }
