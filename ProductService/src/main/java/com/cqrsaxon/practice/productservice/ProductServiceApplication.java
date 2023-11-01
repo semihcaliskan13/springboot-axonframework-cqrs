@@ -1,7 +1,9 @@
 package com.cqrsaxon.practice.productservice;
 
 import com.cqrsaxon.practice.productservice.coreapi.CreateProductCommandInterceptor;
+import com.cqrsaxon.practice.productservice.exception.ProductEventErrorHandling;
 import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.config.EventProcessingConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,6 +23,13 @@ public class ProductServiceApplication {
     @Autowired
     public void registerCreateProductCommandInterceptor(ApplicationContext context, CommandBus commandBus) {
         commandBus.registerDispatchInterceptor(context.getBean(CreateProductCommandInterceptor.class));
+    }
+
+    @Autowired
+    public void cofigureEventErrorHandling(EventProcessingConfigurer eventProcessingConfigurer) {
+        eventProcessingConfigurer.registerListenerInvocationErrorHandler("product-group", conf ->
+                new ProductEventErrorHandling()
+        );
     }
 
 }

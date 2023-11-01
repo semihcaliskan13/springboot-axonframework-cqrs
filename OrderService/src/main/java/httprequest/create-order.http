@@ -1,0 +1,8 @@
+POST http://localhost:8082/orders
+Content-Type: application/json
+
+{
+   "productId": "sdfs",
+   "quantity":  5,
+  "addressId":  "sdgfurq"
+}
