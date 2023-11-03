@@ -5,6 +5,8 @@ import com.cqrsaxon.practice.productservice.coreapi.GetAllProductsQuery;
 import com.cqrsaxon.practice.productservice.dto.request.CreateProductRequest;
 import com.cqrsaxon.practice.productservice.dto.response.ProductGetAllResponseWrapper;
 import jakarta.validation.Valid;
+import org.axonframework.commandhandling.CommandMessage;
+import org.axonframework.commandhandling.GenericCommandMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
@@ -16,6 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
+import static java.util.Collections.singletonMap;
 
 @RestController
 @RequestMapping("/products")
@@ -47,7 +51,9 @@ public class ProductController {
                 .productId(UUID.randomUUID().toString())
                 .quantity(request.getQuantity()).build();
 
-         CompletableFuture<String> returnValue = commandGateway.send(productCommand);
+
+
+        CompletableFuture<String> returnValue = commandGateway.send(productCommand);
         return returnValue.get();
     }
 

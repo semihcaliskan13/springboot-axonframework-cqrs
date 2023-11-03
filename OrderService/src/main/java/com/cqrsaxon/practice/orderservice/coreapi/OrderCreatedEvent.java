@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class OrderCreatedEvent {
-    public String orderId;
+    private String orderId;
     private String userId;
     private String productId;
     private int quantity;

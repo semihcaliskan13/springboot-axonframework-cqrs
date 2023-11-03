@@ -1,5 +1,7 @@
 package com.cqrsaxon.practice.productservice.coreapi;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -13,6 +15,8 @@ import java.math.BigDecimal;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate
+//@Getter
+//@Setter
 public class ProductAggregate {
     @AggregateIdentifier
     private String productId;
@@ -23,7 +27,7 @@ public class ProductAggregate {
     public ProductAggregate() {
     }
 
-    @CommandHandler
+    @CommandHandler(routingKey = "CreateProductCommand")
     public ProductAggregate(CreateProductCommand createProductCommand){
         if (createProductCommand.getPrice().compareTo(BigDecimal.ZERO)<=0){
             throw new IllegalArgumentException("Price cannot be less or equal to zero");
@@ -37,7 +41,12 @@ public class ProductAggregate {
         apply(event);
     }
 
-    @EventSourcingHandler
+    @CommandHandler(commandName = "ReserveProductCommand")
+    public void handle(ReserveProductCommand reserveProductCommand){
+
+    }
+
+    @EventSourcingHandler(payloadType = ProductCreatedEvent.class)
     public void on(ProductCreatedEvent event){
         this.productId= event.getProductId();
         this.price=event.getPrice();

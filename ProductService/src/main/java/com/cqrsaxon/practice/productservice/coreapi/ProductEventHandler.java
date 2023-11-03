@@ -20,7 +20,7 @@ public class ProductEventHandler {
         this.productRepository = productRepository;
     }
 
-    @EventHandler
+    @EventHandler(payloadType = ProductCreatedEvent.class)
     public void on(ProductCreatedEvent productCreatedEvent) throws RuntimeException {
         //query-side
         Product product = new Product();
