@@ -25,13 +25,17 @@ public class AxonConfig {
                 .build();
     }
 
-//    @Bean
-//    @Primary
-//    @Qualifier("messageSerializer")
-//    public Serializer serializer() {
-//        return ShorterJacksonSerializer.builder()
-//                .build();
-//    }
+    @Bean
+    @Primary
+    public Serializer serializer() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        return ShorterJacksonSerializer.builder()
+                .objectMapper(objectMapper)
+                .build();
+    }
 
 
 

@@ -1,12 +1,13 @@
-package com.cqrsaxon.practice.orderservice.coreapi;
+package com.cqrsaxon.practice.shared.command;
 
-
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
-@Data
+@Getter
+@Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class ReserveProductCommand {
 
     @TargetAggregateIdentifier

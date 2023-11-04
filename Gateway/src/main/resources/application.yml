@@ -6,3 +6,8 @@ spring:
           uri: lb://product-service
           predicates:
             - Path=/products/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+

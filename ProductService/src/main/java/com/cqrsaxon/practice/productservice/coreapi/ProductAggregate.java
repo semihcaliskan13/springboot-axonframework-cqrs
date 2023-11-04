@@ -1,5 +1,8 @@
 package com.cqrsaxon.practice.productservice.coreapi;
 
+import com.cqrsaxon.practice.productservice.collection.Product;
+import com.cqrsaxon.practice.shared.command.ReserveProductCommand;
+import event.ProductReservedEvent;
 import lombok.Getter;
 import lombok.Setter;
 import org.axonframework.commandhandling.CommandHandler;
@@ -15,8 +18,8 @@ import java.math.BigDecimal;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate
-//@Getter
-//@Setter
+@Getter
+@Setter
 public class ProductAggregate {
     @AggregateIdentifier
     private String productId;
@@ -28,29 +31,44 @@ public class ProductAggregate {
     }
 
     @CommandHandler(routingKey = "CreateProductCommand")
-    public ProductAggregate(CreateProductCommand createProductCommand){
-        if (createProductCommand.getPrice().compareTo(BigDecimal.ZERO)<=0){
+    public ProductAggregate(CreateProductCommand createProductCommand) {
+        if (createProductCommand.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price cannot be less or equal to zero");
         }
-        if (createProductCommand.getTitle() == null || createProductCommand.getTitle().isBlank()){
+        if (createProductCommand.getTitle() == null || createProductCommand.getTitle().isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
 
         ProductCreatedEvent event = new ProductCreatedEvent();
-        BeanUtils.copyProperties(createProductCommand,event);
+        BeanUtils.copyProperties(createProductCommand, event);
         apply(event);
     }
 
-    @CommandHandler(commandName = "ReserveProductCommand")
-    public void handle(ReserveProductCommand reserveProductCommand){
+    @CommandHandler
+    public void handle(ReserveProductCommand reserveProductCommand) {
+        if (quantity < reserveProductCommand.getQuantity()) {
+            throw new IllegalArgumentException("Insufficient number of items in stock");
+        }
+        ProductReservedEvent event = ProductReservedEvent.builder()
+                .userId(reserveProductCommand.getUserId())
+                .productId(reserveProductCommand.getProductId())
+                .orderId(reserveProductCommand.getOrderId())
+                .quantity(reserveProductCommand.getQuantity())
+                .build();
 
+        apply(event);
     }
 
-    @EventSourcingHandler(payloadType = ProductCreatedEvent.class)
-    public void on(ProductCreatedEvent event){
-        this.productId= event.getProductId();
-        this.price=event.getPrice();
-        this.title=event.getTitle();
-        this.quantity=event.getQuantity();
+    @EventSourcingHandler
+    public void on(ProductCreatedEvent event) {
+        this.productId = event.getProductId();
+        this.price = event.getPrice();
+        this.title = event.getTitle();
+        this.quantity = event.getQuantity();
+    }
+
+    @EventSourcingHandler
+    public void on(ProductReservedEvent event) {
+        this.quantity = event.getQuantity();
     }
 }

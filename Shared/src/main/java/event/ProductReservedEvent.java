@@ -1,13 +1,14 @@
-package com.cqrsaxon.practice.productservice.coreapi;
+package event;
 
-
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor(force = true)
 @Builder
-public class ReserveProductCommand {
+public class ProductReservedEvent {
 
     @TargetAggregateIdentifier
     private final String productId;

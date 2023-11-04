@@ -1,8 +1,8 @@
-POST http://localhost:8082/orders
+POST http://localhost:8080/orders
 Content-Type: application/json
 
 {
-   "productId": "sdfs",
+   "productId": "509aa309-c796-4850-b090-63e14dfe5294",
    "quantity":  5,
   "addressId":  "sdgfurq"
 }

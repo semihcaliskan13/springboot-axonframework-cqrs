@@ -1,5 +1,6 @@
 package com.cqrsaxon.practice.productservice.config;
 
+import jakarta.validation.constraints.NotNull;
 import org.axonframework.serialization.SerializedType;
 import org.axonframework.serialization.SimpleSerializedType;
 import org.axonframework.serialization.json.JacksonSerializer;
@@ -10,18 +11,22 @@ public class ShorterJacksonSerializer extends JacksonSerializer {
         super(builder);
     }
 
-    protected String resolveClassName(SerializedType serializedType) {
-        int lastIndexOfPackageName = serializedType.getName().lastIndexOf(".") + 1;
-        String shortName = serializedType.getName().substring(lastIndexOfPackageName);
-        return shortName;
-    }
+    String basePackage = "com.cqrsaxon.practice.productservice.coreapi";
 
+    protected String resolveClassName(SerializedType serializedType) {
+        return basePackage + "." + serializedType.getName();
+    }
 
     @Override
     public SerializedType typeForClass(Class type) {
-        int lastIndexOfPackageName = type.getName().lastIndexOf(".") + 1;
-        String shortName = type.getName().substring(lastIndexOfPackageName);
-        return new SimpleSerializedType(shortName, getRevisionResolver().revisionOf(type));
+        if (type.getName().startsWith(basePackage)) {
+            String shortName = type.getName().replace(basePackage + ".", "");
+            return new SimpleSerializedType(shortName, getRevisionResolver().revisionOf(type));
+        } else {
+            return new SimpleSerializedType(type.getName(), getRevisionResolver().revisionOf(type));
+        }
     }
+
+
 }
 
