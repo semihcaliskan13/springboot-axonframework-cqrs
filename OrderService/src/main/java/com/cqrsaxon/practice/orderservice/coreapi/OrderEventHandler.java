@@ -22,4 +22,12 @@ public class OrderEventHandler {
         BeanUtils.copyProperties(event,order);
         repository.save(order);
     }
+
+    @EventHandler
+    public void on(OrderApprovedEvent event){
+        Order order = repository.findById(event.getOrderId()).orElseThrow();
+        order.setOrderStatus(event.getOrderStatus());
+        BeanUtils.copyProperties(event, order);
+        repository.save(order);
+    }
 }

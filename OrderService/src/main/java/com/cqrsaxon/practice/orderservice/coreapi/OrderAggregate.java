@@ -30,6 +30,17 @@ public class OrderAggregate {
         apply(orderCreatedEvent);
     }
 
+    @CommandHandler
+    public void handle(ApproveOrderCommand command){
+        OrderApprovedEvent event = new OrderApprovedEvent(command.getOrderId());
+        apply(event);
+    }
+
+    @EventSourcingHandler
+    public void on(OrderApprovedEvent event){
+        this.orderStatus = event.getOrderStatus();
+    }
+
     @EventSourcingHandler
     public void on(OrderCreatedEvent event) {
         this.orderId = event.getOrderId();

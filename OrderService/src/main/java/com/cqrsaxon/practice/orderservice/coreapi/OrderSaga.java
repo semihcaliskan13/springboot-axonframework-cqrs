@@ -2,11 +2,13 @@ package com.cqrsaxon.practice.orderservice.coreapi;
 
 import com.cqrsaxon.practice.shared.command.ProcessPaymentCommand;
 import com.cqrsaxon.practice.shared.command.ReserveProductCommand;
+import event.PaymentProcessedEvent;
 import event.ProductReservedEvent;
 import lombok.extern.slf4j.Slf4j;
 import model.User;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
@@ -87,5 +89,16 @@ public class OrderSaga {
         }
     }
 
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(PaymentProcessedEvent event){
+        ApproveOrderCommand orderCommand = new ApproveOrderCommand(event.getOrderId());
+        commandGateway.send(orderCommand);
+    }
 
+    @EndSaga
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderApprovedEvent event){
+        log.info("OrderSaga is completed.");
+        SagaLifecycle.end();
+    }
 }
