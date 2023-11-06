@@ -1,8 +1,11 @@
 package com.cqrsaxon.practice.orderservice.coreapi;
 
+import com.cqrsaxon.practice.shared.command.CancelProductReservationCommand;
 import com.cqrsaxon.practice.shared.command.ProcessPaymentCommand;
 import com.cqrsaxon.practice.shared.command.ReserveProductCommand;
+import event.OrderRejectedEvent;
 import event.PaymentProcessedEvent;
+import event.ProductReservationCancelledEvent;
 import event.ProductReservedEvent;
 import lombok.extern.slf4j.Slf4j;
 import model.User;
@@ -48,6 +51,7 @@ public class OrderSaga {
         commandGateway.send(reserveProductCommand, (commandMessage, commandResultMessage) -> {
             if (commandResultMessage.isExceptional()) {
                 //start a compensating transaction
+                //here if stock is not enough, compensate transaction.
             }
         });
 
@@ -65,10 +69,12 @@ public class OrderSaga {
         } catch (Exception exception) {
             log.error(exception.getMessage());
             //start compensating transaction.
+            CancelProductReservation(event,exception.getMessage());
             return;
         }
         if (user == null) {
             //start compensating transaction.
+            CancelProductReservation(event,"Payment details is null");
         }
         log.info(String.format("Fetched user: %s ", user.getFirstName() + " " + user.getLastName()));
 
@@ -82,10 +88,13 @@ public class OrderSaga {
             result = commandGateway.sendAndWait(processPaymentCommand, 10, TimeUnit.SECONDS);
         } catch (Exception e) {
             //start compensating transaction.
+            CancelProductReservation(event,e.getMessage());
             log.error(e.getMessage());
         }
         if (result == null) {
             //start compensating transaction.
+            CancelProductReservation(event,"Cannot process payment");
+            return;
         }
     }
 
@@ -100,5 +109,33 @@ public class OrderSaga {
     public void handle(OrderApprovedEvent event){
         log.info("OrderSaga is completed.");
         SagaLifecycle.end();
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(ProductReservationCancelledEvent event){
+        //create and send rejectOrder command.
+        RejectOrderCommand command = RejectOrderCommand.builder()
+                .orderId(event.getOrderId())
+                .reason(event.getReason())
+                .build();
+        commandGateway.send(command);
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderRejectedEvent event){
+        //order was successfully rejected.
+    }
+
+    private void CancelProductReservation(ProductReservedEvent event , String reason){
+
+        CancelProductReservationCommand command = CancelProductReservationCommand.builder()
+                .orderId(event.getOrderId())
+                .reason(reason)
+                .productId(event.getProductId())
+                .quantity(event.getQuantity())
+                .build();
+
+        commandGateway.send(command);
     }
 }

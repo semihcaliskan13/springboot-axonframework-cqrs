@@ -1,7 +1,9 @@
 package com.cqrsaxon.practice.productservice.coreapi;
 
 import com.cqrsaxon.practice.productservice.collection.Product;
+import com.cqrsaxon.practice.shared.command.CancelProductReservationCommand;
 import com.cqrsaxon.practice.shared.command.ReserveProductCommand;
+import event.ProductReservationCancelledEvent;
 import event.ProductReservedEvent;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,6 +61,19 @@ public class ProductAggregate {
         apply(event);
     }
 
+    @CommandHandler
+    public void handle(CancelProductReservationCommand command) {
+        ProductReservationCancelledEvent event = ProductReservationCancelledEvent.builder()
+                .productId(command.getProductId())
+                .reason(command.getReason())
+                .orderId(command.getOrderId())
+                .quantity(command.getQuantity())
+                .userId(command.getUserId())
+                .build();
+
+        apply(event);
+    }
+
     @EventSourcingHandler
     public void on(ProductCreatedEvent event) {
         this.productId = event.getProductId();
@@ -70,5 +85,10 @@ public class ProductAggregate {
     @EventSourcingHandler
     public void on(ProductReservedEvent event) {
         this.quantity = event.getQuantity();
+    }
+
+    @EventSourcingHandler
+    public void on(ProductReservationCancelledEvent event) {
+        this.quantity += event.getQuantity();
     }
 }

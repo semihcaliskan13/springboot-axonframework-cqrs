@@ -1,6 +1,7 @@
 package com.cqrsaxon.practice.orderservice.coreapi;
 
 import com.cqrsaxon.practice.orderservice.enums.OrderStatus;
+import event.OrderRejectedEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -31,13 +32,28 @@ public class OrderAggregate {
     }
 
     @CommandHandler
-    public void handle(ApproveOrderCommand command){
+    public void handle(ApproveOrderCommand command) {
         OrderApprovedEvent event = new OrderApprovedEvent(command.getOrderId());
         apply(event);
     }
 
+    @CommandHandler
+    public void handle(RejectOrderCommand command) {
+        OrderRejectedEvent event = OrderRejectedEvent.builder()
+                .reason(command.getReason())
+                .orderId(command.getOrderId())
+                .build();
+
+        apply(event);
+    }
+
     @EventSourcingHandler
-    public void on(OrderApprovedEvent event){
+    public void on(OrderRejectedEvent event){
+        this.orderStatus=event.getOrderStatus();
+    }
+
+    @EventSourcingHandler
+    public void on(OrderApprovedEvent event) {
         this.orderStatus = event.getOrderStatus();
     }
 

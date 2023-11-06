@@ -2,6 +2,7 @@ package com.cqrsaxon.practice.productservice.coreapi;
 
 import com.cqrsaxon.practice.productservice.collection.Product;
 import com.cqrsaxon.practice.productservice.repository.ProductRepository;
+import event.ProductReservationCancelledEvent;
 import event.ProductReservedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
@@ -31,11 +32,18 @@ public class ProductEventHandler {
     }
 
     @EventHandler
-    public void on(ProductReservedEvent event){
+    public void on(ProductReservedEvent event) {
         Product product = productRepository.findByProductId(event.getProductId()).orElseThrow();
         product.setQuantity(product.getQuantity() - event.getQuantity());
         productRepository.save(product);
-        log.info(String.format("ProductReservedEvent called for productId: %s and orderId: %S",event.getProductId(),event.getOrderId()));
+        log.info(String.format("ProductReservedEvent called for productId: %s and orderId: %S", event.getProductId(), event.getOrderId()));
+    }
+
+    @EventHandler
+    public void on(ProductReservationCancelledEvent event) {
+        Product product = productRepository.findByProductId(event.getProductId()).orElseThrow();
+        product.setQuantity(product.getQuantity() + event.getQuantity());
+        productRepository.save(product);
     }
 
 
